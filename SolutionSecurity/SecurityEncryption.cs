@@ -4,11 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SolutionSecurity
 {
-    internal class SecurityEncryption
+    public class SecurityEncryption
     {
         private const string StrPermutation = "axdwoutiyqf";
         private const int BytePermutation1 = 0x19;

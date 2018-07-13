@@ -109,35 +109,43 @@ namespace SolutionSecurity
         private void Context_AuthenticateRequest(object sender, EventArgs e)
         {
 
-
-            string sessionCookieValue = null;
-            string SecurityCookieValue = string.Empty;
-
-            var context = ((HttpApplication)sender).Context;
-            if (context.Request.CurrentExecutionFilePath == "/webform2.aspx")
+            try
             {
-                return;
+
+
+                string sessionCookieValue = null;
+                string SecurityCookieValue = string.Empty;
+
+                var context = ((HttpApplication)sender).Context;
+                if (context.Request.CurrentExecutionFilePath == "/webform2.aspx" ||
+                    context.Request.CurrentExecutionFilePath == "/adding.ashx")
+                {
+                    return;
+                }
+
+                var sessionCookie = context.Request.Cookies[SessionCookieName];
+
+                if (sessionCookie?.Value == null)
+                {
+                    context.Response.Redirect("https://cpt-icedev.datacash.co.za/logon2.asp");
+                }
+
+                //if (sessionCookie?.Value != null)
+                //{
+                sessionCookieValue = HttpUtility.UrlDecode(sessionCookie?.Value);
+                var decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
+
+                var applicationCookie = context.Application[decryptedCookieValue];
+
+                if (applicationCookie == null || applicationCookie.ToString() != sessionCookieValue)
+                {
+                    context.Response.Redirect("login.asp");
+                }
             }
-
-            var sessionCookie = context.Request.Cookies[SessionCookieName];
-
-            if (sessionCookie?.Value == null)
+            catch
             {
-                context.Response.Redirect("login.asp");
+                ((HttpApplication)sender).Context.Response.Redirect("login.asp");
             }
-
-            //if (sessionCookie?.Value != null)
-            //{
-            sessionCookieValue = HttpUtility.UrlDecode(sessionCookie?.Value);
-            var decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
-
-            var applicationCookie = context.Application[decryptedCookieValue];
-
-            if (applicationCookie == null || applicationCookie.ToString() != sessionCookieValue)
-            {
-                context.Response.Redirect("login.asp");
-            }
-            //}
 
 
             //var securityCookie = context.Request.Cookies[SecurityCookieName];

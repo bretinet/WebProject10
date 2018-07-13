@@ -61,6 +61,7 @@
     <Content Include="adding.ashx" />
     <Content Include="WebForm2.aspx" />
     <Content Include="Removing.ashx" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
