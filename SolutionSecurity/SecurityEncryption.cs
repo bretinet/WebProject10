@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SolutionSecurity
 {
-    internal class SecurityEncryption
+    public class SecurityEncryption
     {
         private const string StrPermutation = "axdwoutiyqf";
         private const int BytePermutation1 = 0x19;
@@ -32,7 +32,14 @@ namespace SolutionSecurity
         // decoding
         public static string Decrypt(string strData)
         {
-            return Encoding.UTF8.GetString(Decrypt(Convert.FromBase64String(strData)));
+            try
+            {
+                return Encoding.UTF8.GetString(Decrypt(Convert.FromBase64String(strData)));
+            }
+            catch
+            {
+                return null;
+            }
         }
 
 
@@ -95,7 +102,11 @@ namespace SolutionSecurity
             cryptostream.Close();
             return memstream.ToArray();
         }
-        
+
+        //public static bool ValidatePassword(string)
+        //{
+            
+        //}
     }
 }
 

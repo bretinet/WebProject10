@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication10", "WebApplication10\WebApplication10.csproj", "{3692BDC8-2DD1-4309-B5AD-E5CBFBF2BE1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICEProject", "WebApplication10\ICEProject.csproj", "{3692BDC8-2DD1-4309-B5AD-E5CBFBF2BE1E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionSecurity", "SolutionSecurity\SolutionSecurity.csproj", "{D1DA2158-0561-41A3-AC00-657BD5384DF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICEPermisions2018", "ICEPermisions2018\ICEPermisions2018.csproj", "{3FD7370A-4CA0-41AE-962E-B1CF9E323693}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D1DA2158-0561-41A3-AC00-657BD5384DF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1DA2158-0561-41A3-AC00-657BD5384DF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1DA2158-0561-41A3-AC00-657BD5384DF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FD7370A-4CA0-41AE-962E-B1CF9E323693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD7370A-4CA0-41AE-962E-B1CF9E323693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FD7370A-4CA0-41AE-962E-B1CF9E323693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FD7370A-4CA0-41AE-962E-B1CF9E323693}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

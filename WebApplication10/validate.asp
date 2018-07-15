@@ -13,10 +13,10 @@
   If oXMLHTTP.Status = 200 Then
 
         GetTextFromUrl = oXMLHTTP.responseText
+
+
         Response.Cookies("SessionCookie") = GetTextFromUrl
         Response.Cookies("SessionCookie").Expires = DateAdd("n", 30, Now())
-
-
         Response.Redirect("default.asp")
   End If
 
@@ -24,14 +24,15 @@ End Function
 
 
     
-    %>
+%>
+
 
 <%
     If Request.Form("UserId") = "S" then
         Session("LogOn") = True
   
-        
-        GetTextFromUrl("https://localhost:44334/adding.ashx?")
+       
+        GetTextFromUrl("http://localhost:60381/Adding.ashx")
     End if 
      
 %>

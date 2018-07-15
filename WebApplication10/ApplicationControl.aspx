@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="WebForm2.aspx.cs" Inherits="WebApplication10.WebForm2" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ApplicationControl.aspx.cs" Inherits="ICEProject.ApplicationControl" %>
 
 <!DOCTYPE html>
 

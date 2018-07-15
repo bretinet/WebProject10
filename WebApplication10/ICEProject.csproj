@@ -10,8 +10,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebApplication10</RootNamespace>
-    <AssemblyName>WebApplication10</AssemblyName>
+    <RootNamespace>ICEProject</RootNamespace>
+    <AssemblyName>ICEProject</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
@@ -59,8 +59,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="adding.ashx" />
-    <Content Include="WebForm2.aspx" />
+    <Content Include="probe1.asp" />
+    <Content Include="validatejs.asp" />
+    <Content Include="ApplicationControl.aspx" />
     <Content Include="Removing.ashx" />
+    <Content Include="Check.ashx" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -88,6 +92,9 @@
     <Compile Include="adding.ashx.cs">
       <DependentUpon>adding.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Check.ashx.cs">
+      <DependentUpon>Check.ashx</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -102,12 +109,12 @@
     <Compile Include="WebForm1.aspx.designer.cs">
       <DependentUpon>WebForm1.aspx</DependentUpon>
     </Compile>
-    <Compile Include="WebForm2.aspx.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
+    <Compile Include="ApplicationControl.aspx.cs">
+      <DependentUpon>ApplicationControl.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="WebForm2.aspx.designer.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
+    <Compile Include="ApplicationControl.aspx.designer.cs">
+      <DependentUpon>ApplicationControl.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Web;
+using System.Web.Configuration;
+using System.Web.SessionState;
 
 namespace SolutionSecurity
 {
-    public class SecurityValidation : IHttpModule
+    public class SecurityValidation : IHttpModule, IRequiresSessionState
     {
         private const string SecurityCookieName = "TempSession";
         private const string SessionCookieName = "SessionCookie";
@@ -23,6 +29,7 @@ namespace SolutionSecurity
 
         private void Context_BeginRequest(object sender, EventArgs e)
         {
+            /*
             var context = ((HttpApplication)sender).Context;
 
             if (context.Request.CurrentExecutionFilePath == "/adding.ashx")
@@ -92,52 +99,248 @@ namespace SolutionSecurity
                     //context.Response.Write(encrypedValue);
                     //context.Response.End();
                 }
-            }
-        }
+            }*/
 
-        private void Context_PostAuthenticateRequest(object sender, EventArgs e)
-        {
-            var context = ((HttpApplication)sender).Context;
-            var securityCookie = context.Request.Cookies[SecurityCookieName];
-            if (securityCookie != null)
-            {
-                securityCookie.Expires = DateTime.Now.AddDays(-1);
-                context.Response.Cookies.Add(securityCookie);
-            }
-        }
+            //try
+            //{
 
-        private void Context_AuthenticateRequest(object sender, EventArgs e)
-        {
-
-
-            string sessionCookieValue = null;
-            string SecurityCookieValue = string.Empty;
+            var defaultUrl = WebConfigurationManager.AppSettings["DefaultUrl"];
 
             var context = ((HttpApplication)sender).Context;
-            if (context.Request.CurrentExecutionFilePath == "/webform2.aspx")
+
+            if (IsAllowedPage(context))
             {
                 return;
             }
 
-            var sessionCookie = context.Request.Cookies[SessionCookieName];
+            var ddd = GetCookie2(context);
+            var fff = GetApplicationSession2(context, ddd.Item1);
 
-            if (sessionCookie?.Value == null)
+            if (!HasCookieValue(context, SessionCookieName, checkEncryptedValue: true))
             {
-                context.Response.Redirect("login.asp");
+                context.Response.Redirect(defaultUrl);
             }
 
-            //if (sessionCookie?.Value != null)
+
+            var sessionTicket = GetSessionTicket(context);
+            var applicationTicket = GetApplicationTicket(context);
+
+            if (!ValidateTickets(sessionTicket, applicationTicket))
+            {
+                context.Response.Redirect(defaultUrl);
+            }
+        }
+
+        private bool ValidateTickets(string sesssion, string application)
+        {
+            if (string.IsNullOrWhiteSpace(sesssion) || string.IsNullOrWhiteSpace(application))
+            {
+                return false;
+            }
+
+            return sesssion == application;
+        }
+
+        private static bool IsAllowedPage(HttpContext context)
+        {
+            var allowedPages = WebConfigurationManager.AppSettings["AllowedPages"];
+
+            if (allowedPages == null)
+            {
+                return false;
+            }
+
+            var allowedPagesList = allowedPages.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+
+            var currentpage = context.Request.AppRelativeCurrentExecutionFilePath?.Replace("~/", "");
+
+            return allowedPagesList.Contains(currentpage, StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        private static bool IsAllowedApplication(HttpContext context)
+        {
+            var allowedApplications = WebConfigurationManager.AppSettings["AllowedApplications"];
+
+            if (allowedApplications == null)
+            {
+                return false;
+            }
+
+            var allowedApplicationList = allowedApplications.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+
+            var currentpage = context.Request.ApplicationPath?.Replace("/", "");
+
+            return allowedApplicationList.Contains(currentpage, StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        private static bool HasCookieValue(HttpContext context, string cookieName, bool checkEncryptedValue = false)
+        {
+            var sessionCookie = context.Request.Cookies[cookieName];
+
+            var isNull = sessionCookie?.Value == null;
+            if (isNull)
+            {
+                return false;
+            }
+
+            if (!checkEncryptedValue)
+            {
+                return true;
+            }
+
+            try
+            {
+                var sessionCookieValue = HttpUtility.UrlDecode(sessionCookie.Value);
+                var decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
+
+                return decryptedCookieValue != null;
+            }
+            catch
+            {
+                return false;
+            }
+
+        }
+
+        private string GetCookieValue(HttpContext context, string cookieName, bool isEncrypted)
+        {
+            try
+            {
+                var sessionCookie = context.Request.Cookies[cookieName];
+                var hasCookieValue = HasCookieValue(context, cookieName, isEncrypted);
+
+                if (!hasCookieValue)
+                {
+                    return null;
+                }
+
+                var sessionCookieUrlDecoded = HttpUtility.UrlDecode(sessionCookie?.Value);
+                if (!isEncrypted)
+                {
+                    return sessionCookieUrlDecoded;
+                }
+
+                var decryptedValue = SecurityEncryption.Decrypt(sessionCookieUrlDecoded);
+                return decryptedValue;
+            }
+            catch
+            {
+                return null;
+            }
+
+
+        }
+
+        private string GetSessionTicket(HttpContext context)
+        {
+            var decryptedCookieValue = GetCookieValue(context, SessionCookieName, true);
+            var encryptedCookieValue = GetCookieValue(context, SessionCookieName, false);
+
+            return encryptedCookieValue != null && decryptedCookieValue != null
+                ? $"{encryptedCookieValue}{decryptedCookieValue}" :
+            null;
+        }
+
+        private string GetApplicationTicket(HttpContext context)
+        {
+            var decryptedCookieValue = GetCookieValue(context, SessionCookieName, true);
+            var encryptedCookieValue = GetCookieValue(context, SessionCookieName, false);
+
+
+            if (context.Request.ApplicationPath != null && context.Request.ApplicationPath.Equals("/"))
+            {
+
+                var applicationCookieValue = context.Application[decryptedCookieValue];
+
+                return applicationCookieValue != null ? $"{applicationCookieValue}{decryptedCookieValue}" : null;
+            }
+
+            if (IsAllowedApplication(context))
+            {
+
+                var applicationCookieValue = GetApplicationParentSession(encryptedCookieValue);
+
+                return !string.IsNullOrWhiteSpace(applicationCookieValue) && !applicationCookieValue.Contains("False")
+                    ? applicationCookieValue
+                    : null;
+            }
+
+            return null;
+
+        }
+
+        private string GetApplicationParentSession(string encryptedValue)
+        {
+            var appRoot = WebConfigurationManager.AppSettings["AppRoot"];
+            try
+            {
+                var httpClient = new HttpClient();
+                var content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("code", encryptedValue)
+                });
+
+                return httpClient.PostAsync(appRoot + "/check.ashx", content).Result.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void Context_PostAuthenticateRequest(object sender, EventArgs e)
+        {
+            //var context = ((HttpApplication)sender).Context;
+            //var securityCookie = context.Request.Cookies[SecurityCookieName];
+            //if (securityCookie != null)
             //{
-            sessionCookieValue = HttpUtility.UrlDecode(sessionCookie?.Value);
-            var decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
-
-            var applicationCookie = context.Application[decryptedCookieValue];
-
-            if (applicationCookie == null || applicationCookie.ToString() != sessionCookieValue)
-            {
-                context.Response.Redirect("login.asp");
-            }
+            //    securityCookie.Expires = DateTime.Now.AddDays(-1);
+            //    context.Response.Cookies.Add(securityCookie);
             //}
+        }
+
+        private void Context_AuthenticateRequest(object sender, EventArgs e)
+        {
+            /*
+            try
+            {
+
+
+                string sessionCookieValue = null;
+                string SecurityCookieValue = string.Empty;
+
+                var context = ((HttpApplication) sender).Context;
+                if (context.Request.CurrentExecutionFilePath == "/ApplicationControl.aspx" ||
+                    context.Request.CurrentExecutionFilePath == "/adding.ashx")
+                {
+                    return;
+                }
+
+                var sessionCookie = context.Request.Cookies[SessionCookieName];
+
+                if (sessionCookie?.Value == null)
+                {
+                    context.Response.Redirect("login.asp",false);
+                    context.Response.End();
+                }
+
+                //if (sessionCookie?.Value != null)
+                //{
+                sessionCookieValue = HttpUtility.UrlDecode(sessionCookie?.Value);
+                var decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
+
+                var applicationCookie = context.Application[decryptedCookieValue];
+
+                if (applicationCookie == null || applicationCookie.ToString() != sessionCookieValue)
+                {
+                    context.Response.Redirect("login2.asp");
+                }
+            }
+            catch (Exception ex)
+            {
+                var context = ((HttpApplication)sender).Context;
+                context.Response.Redirect("login3.asp");
+            }*/
 
 
             //var securityCookie = context.Request.Cookies[SecurityCookieName];
@@ -151,5 +354,43 @@ namespace SolutionSecurity
             //    context.Response.Redirect("~/login.asp");
             //}
         }
+
+
+        private Tuple<string, string> GetCookie2(HttpContext context)
+        {
+            var cookie = context.Request.Cookies[SessionCookieName];
+            if (cookie?.Value == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var urlDecodeCookieValue = HttpUtility.UrlDecode(cookie.Value);
+                var decryptedCookieValue = SecurityEncryption.Decrypt(urlDecodeCookieValue);
+
+                return decryptedCookieValue != null ? new Tuple<string, string>(urlDecodeCookieValue, decryptedCookieValue) : null;
+            }
+            catch
+            {
+                return null;
+            }
+
+        }
+
+        private Tuple<string, string> GetApplicationSession2(HttpContext context, string aplicationId)
+        {
+            var applicationIdValue = context.Application[aplicationId];
+
+            if (applicationIdValue == null)
+            {
+                return null;
+            }
+
+            return new Tuple<string, string>(aplicationId, applicationIdValue.ToString());
+        }
+
+
+
     }
 }
