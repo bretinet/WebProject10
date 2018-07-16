@@ -14,7 +14,7 @@ namespace ICEProject
         public void ProcessRequest(HttpContext context)
         {
 
-            const string cookieTest = "cookietest";
+            const string cookieTest = "CookieTemp";
 
             var cookie = context.Request.Cookies[cookieTest];
 

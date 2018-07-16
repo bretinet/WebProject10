@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net.Http;
+using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.SessionState;
@@ -29,6 +30,10 @@ namespace SolutionSecurity
 
         private void Context_BeginRequest(object sender, EventArgs e)
         {
+            if (WebConfigurationManager.AppSettings["SecurityActivation"] != "True")
+            {
+                return;
+            }
             /*
             var context = ((HttpApplication)sender).Context;
 
@@ -113,8 +118,8 @@ namespace SolutionSecurity
                 return;
             }
 
-            var ddd = GetCookie2(context);
-            var fff = GetApplicationSession2(context, ddd.Item1);
+            //var ddd = GetCookie2(context);
+            //var fff = GetApplicationSession2(context, ddd.Item1);
 
             if (!HasCookieValue(context, SessionCookieName, checkEncryptedValue: true))
             {
@@ -133,7 +138,7 @@ namespace SolutionSecurity
 
         private bool ValidateTickets(string sesssion, string application)
         {
-            if (string.IsNullOrWhiteSpace(sesssion) || string.IsNullOrWhiteSpace(application))
+            if (string.IsNullOrEmpty(sesssion) || string.IsNullOrEmpty(application))
             {
                 return false;
             }
@@ -260,7 +265,7 @@ namespace SolutionSecurity
 
                 var applicationCookieValue = GetApplicationParentSession(encryptedCookieValue);
 
-                return !string.IsNullOrWhiteSpace(applicationCookieValue) && !applicationCookieValue.Contains("False")
+                return !string.IsNullOrEmpty(applicationCookieValue) && !applicationCookieValue.Contains("False")
                     ? applicationCookieValue
                     : null;
             }
@@ -271,16 +276,32 @@ namespace SolutionSecurity
 
         private string GetApplicationParentSession(string encryptedValue)
         {
-            var appRoot = WebConfigurationManager.AppSettings["AppRoot"];
+            var appRoot = WebConfigurationManager.AppSettings["InternalAppRoot"];
             try
             {
-                var httpClient = new HttpClient();
-                var content = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("code", encryptedValue)
-                });
+                //var httpClient = new HttpClient();
+                //var content = new FormUrlEncodedContent(new[]
+                //{
+                //    new KeyValuePair<string, string>("code", encryptedValue)
+                //});
 
-                return httpClient.PostAsync(appRoot + "/check.ashx", content).Result.Content.ReadAsStringAsync().Result;
+                //return httpClient.PostAsync(appRoot + "/check.ashx", content).Result.Content.ReadAsStringAsync().Result;
+                ;
+                var request = (HttpWebRequest)WebRequest.Create(appRoot + "check.ashx");
+                var postData = "code=" + encryptedValue;
+                var data = Encoding.ASCII.GetBytes(postData);
+
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentLength = data.Length;
+
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                var response = (HttpWebResponse)request.GetResponse();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
             }
             catch
             {
@@ -355,7 +376,7 @@ namespace SolutionSecurity
             //}
         }
 
-
+        /*
         private Tuple<string, string> GetCookie2(HttpContext context)
         {
             var cookie = context.Request.Cookies[SessionCookieName];
@@ -391,6 +412,6 @@ namespace SolutionSecurity
         }
 
 
-
+    */
     }
 }
