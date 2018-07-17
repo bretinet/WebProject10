@@ -120,6 +120,7 @@ namespace SolutionSecurity
 
             //var ddd = GetCookie2(context);
             //var fff = GetApplicationSession2(context, ddd.Item1);
+            
 
             if (!HasCookieValue(context, SessionCookieName, checkEncryptedValue: true))
             {
@@ -128,12 +129,18 @@ namespace SolutionSecurity
 
 
             var sessionTicket = GetSessionTicket(context);
-            var applicationTicket = GetApplicationTicket(context);
 
-            if (!ValidateTickets(sessionTicket, applicationTicket))
+            if (sessionTicket != null)
             {
-                context.Response.Redirect(defaultUrl);
+                return;
             }
+
+            //var applicationTicket = GetApplicationTicket(context);
+
+            //if (!ValidateTickets(sessionTicket, applicationTicket))
+            //{
+            //    context.Response.Redirect(defaultUrl);
+            //}
         }
 
         private bool ValidateTickets(string sesssion, string application)
@@ -251,8 +258,17 @@ namespace SolutionSecurity
             var decryptedCookieValue = GetCookieValue(context, SessionCookieName, true);
             var encryptedCookieValue = GetCookieValue(context, SessionCookieName, false);
 
+            var ttt = context.Request.FilePath;
+            var ggg = ttt.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries).Select(s=>s.StartsWith("/")?s.Remove(0,1):s).ToList();
+            
+            //if (ggg.Count == 1)
+            //{
 
-            if (context.Request.ApplicationPath != null && context.Request.ApplicationPath.Equals("/"))
+            //}
+
+
+
+            if (ggg.Count == 1)//context.Request.ApplicationPath != null && context.Request.ApplicationPath.Equals("/"))
             {
 
                 var applicationCookieValue = context.Application[decryptedCookieValue];
@@ -260,13 +276,21 @@ namespace SolutionSecurity
                 return applicationCookieValue != null ? $"{applicationCookieValue}{decryptedCookieValue}" : null;
             }
 
-            if (IsAllowedApplication(context))
+            if (ggg.Count >1 ) //&& ggg.Contains("ICE")) // IsAllowedApplication(context))
             {
 
-                var applicationCookieValue = GetApplicationParentSession(encryptedCookieValue);
+                var applicationCookieValue = context.Application[decryptedCookieValue];
+                if(applicationCookieValue != null)
+                {
+                    return applicationCookieValue != null ? $"{applicationCookieValue.ToString()}{decryptedCookieValue}" : null;
+                }
+                
 
-                return !string.IsNullOrEmpty(applicationCookieValue) && !applicationCookieValue.Contains("False")
-                    ? applicationCookieValue
+
+                var applicationCookieValue2 = GetApplicationParentSession(encryptedCookieValue);
+
+                return !string.IsNullOrEmpty(applicationCookieValue2) && !applicationCookieValue2.Contains("False")
+                    ? applicationCookieValue2
                     : null;
             }
 
@@ -292,8 +316,19 @@ namespace SolutionSecurity
                 var data = Encoding.ASCII.GetBytes(postData);
 
                 request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentType = "application/x-www-form-urlencoded"; // "application/xml; charset=utf-8";// "text/plain"; // application/x-www-form-urlencoded";
                 request.ContentLength = data.Length;
+                if (request.CookieContainer == null)
+                {
+                    request.CookieContainer = new CookieContainer();
+                }
+                Cookie c = new Cookie();
+                c.Domain = appRoot.Replace("https://", "").Replace("http://", "").Split(':')[0];
+                c.Name = "code1";
+                c.Value = encryptedValue;
+
+                request.CookieContainer.Add(c);// new Cookie("code", encryptedValue, ));
+                                               //request.CookieContainer.Add(new Cookie("codetemp", encryptedValue, "Temp"));
 
                 using (var stream = request.GetRequestStream())
                 {
@@ -303,7 +338,7 @@ namespace SolutionSecurity
                 var response = (HttpWebResponse)request.GetResponse();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }

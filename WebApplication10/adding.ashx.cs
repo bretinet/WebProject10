@@ -14,7 +14,7 @@ namespace ICEProject
         public void ProcessRequest(HttpContext context)
         {
 
-            const string cookieTest = "CookieTemp";
+            const string cookieTest = "Cookietemp";
 
             var cookie = context.Request.Cookies[cookieTest];
 
@@ -34,6 +34,8 @@ namespace ICEProject
                 context.Response.End();
 
             }
+            context.Response.Write("False");
+            context.Response.End();
         }
 
         public bool IsReusable

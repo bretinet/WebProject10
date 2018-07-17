@@ -20,6 +20,9 @@ namespace ICEProject
 
             var sessionCookieValue = context.Request.Form["code"];
             context.Response.ContentType = "text/plain";
+
+            var session2 = context.Request.Cookies["code1"];
+
             //context.Response.Write("This is plain text");
             if (sessionCookieValue == null)
             {
@@ -30,15 +33,25 @@ namespace ICEProject
             string decryptedCookieValue = null;
             try
             {               
-                decryptedCookieValue = SecurityEncryption.Decrypt(sessionCookieValue);
+                
+                decryptedCookieValue = SecurityEncryption.Decrypt(session2.Value);
             }
             catch
             {
-                context.Response.Write("False");
-                context.Response.End();
+                //context.Response.Write("False");
+                //context.Response.End();
             }
             
-
+            if (decryptedCookieValue == null)
+            {
+                try
+                {
+var v = HttpUtility.UrlDecode(session2.Value);
+                decryptedCookieValue = SecurityEncryption.Decrypt(v);
+                }
+                catch { }
+                
+            }
             
 
             if (decryptedCookieValue == null)
