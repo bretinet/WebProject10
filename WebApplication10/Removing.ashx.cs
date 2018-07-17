@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web;
+using System.Web.Configuration;
 
 namespace ICEProject
 {
@@ -11,6 +12,7 @@ namespace ICEProject
         private const string SessionCookieName = "SessionCookie";
         private const string CookieTempName = "CookieTemp";
         private const string AspNetCookieSessionName = "ASP.NET_SessionID";
+        private const string LogOutUrlAppSettings = "LogOutUrl";
 
         public void ProcessRequest(HttpContext context)
         {
@@ -29,8 +31,9 @@ namespace ICEProject
                     sessionCookie.Expires = DateTime.Now.AddDays(-1);
                     context.Response.Cookies.Add(sessionCookie);
                 }
-                context.Response.Redirect("logon2.asp");
+                //context.Response.Redirect("logon2.asp");
                 //context.Response.End();
+                GenerateContextResponse(context);
             }
 
             var tempCookieValue = tempCookie.Value;
@@ -45,7 +48,8 @@ namespace ICEProject
                     context.Response.Cookies.Add(sessionCookie);
                 }
                 //context.Response.End();
-                context.Response.Redirect("logon2.asp");
+                // context.Response.Redirect("logon2.asp");
+                GenerateContextResponse(context);
             }
 
             var sessionCookieValue = sessionCookie.Value;
@@ -73,8 +77,21 @@ namespace ICEProject
                 context.Response.Cookies.Add(aspNetSessionCookie);
             }
             //context.Response.End();
-            context.Response.Redirect("logon2.asp");
+            //context.Response.Redirect("logon2.asp");
+            GenerateContextResponse(context);
         }
+
+        private void GenerateContextResponse(HttpContext context)
+        {
+            var logOutUrl = WebConfigurationManager.AppSettings[LogOutUrlAppSettings];
+            if (string.IsNullOrEmpty(logOutUrl))
+            {
+                context.Response.End();
+            }
+
+            context.Response.Redirect(logOutUrl);
+        }
+
 
         public bool IsReusable
         {

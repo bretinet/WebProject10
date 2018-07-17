@@ -15,6 +15,8 @@ namespace SolutionSecurity
         private const string SecurityCookieName = "TempSession";
         private const string SessionCookieName = "SessionCookie";
 
+        private const string TrueValue = "True";
+
 
         public void Dispose()
         {
@@ -30,7 +32,7 @@ namespace SolutionSecurity
 
         private void Context_BeginRequest(object sender, EventArgs e)
         {
-            if (WebConfigurationManager.AppSettings["SecurityActivation"] != "True")
+            if (!WebConfigurationManager.AppSettings["SecurityActivation"].Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase))
             {
                 return;
             }
