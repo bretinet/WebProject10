@@ -22,6 +22,6 @@
         <input type="hidden" value="<% Session.SessionID %>" />
         <input type="submit" value="Go" />
     </form>
-    <!--<iframe src="WebForm1.aspx" width="100%"></iframe>-->
+    <iframe src="http://localhost/ICEPermissions2018/Default.aspx" width="100%"></iframe>
 </body>
 </html>

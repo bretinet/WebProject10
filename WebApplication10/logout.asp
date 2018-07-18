@@ -31,11 +31,14 @@ End Function
 <%
 
   
-    dim currentSession
-    currentSession = Session.SessionID
+
     Session.Abandon
-    Response.Cookies("cookietest") = currentSession
-     Response.Cookies("cookietest").Expires = DateAdd("s", 5, Now())
-    Response.Redirect("removing.ashx")
+
+    Response.Redirect("Removing.ashx")
 
     %>
+
+<!--    Response.Cookies("cookietest") = currentSession
+     Response.Cookies("cookietest").Expires = DateAdd("s", 5, Now())-->
+<!--    dim currentSession
+    currentSession = Session.SessionID-->
