@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdministrationPage.cs" />
+    <Compile Include="SecurityManager.cs" />
     <Compile Include="SecurityEncryption.cs" />
     <Compile Include="SecurityValidation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

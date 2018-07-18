@@ -40,8 +40,6 @@ namespace SolutionSecurity
             }
         }
 
-
-
         public static byte[] Encrypt(byte[] strData)
         {
             var passbytes = new Rfc2898DeriveBytes(StrPermutation,
@@ -100,11 +98,6 @@ namespace SolutionSecurity
             cryptostream.Close();
             return memstream.ToArray();
         }
-
-        //public static bool ValidatePassword(string)
-        //{
-            
-        //}
     }
 }
 

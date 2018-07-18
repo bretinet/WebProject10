@@ -7,7 +7,7 @@ using System.Web.Configuration;
 
 namespace SolutionSecurity
 {
-    internal class AdministrationPage
+    internal class SecurityManager
     {
         internal const string SessionCookieName = "SessionCookie";
         internal const string LogOutUrlAppSetting = "LogOutUrl";
@@ -16,17 +16,9 @@ namespace SolutionSecurity
         internal const string DefaultuUrlAppSetting = "DefaultUrl";
 
         internal const string AddingSession = "Adding.ashx";
-        internal const string CheckingApplicationSession = "Checking.ashx";
+        internal const string CheckingSession = "Checking.ashx";
         internal const string RemovingSession = "Removing.ashx";
-
-
-
-
-
-
-
-
-
+        
         internal static void RemoveHttpCookie(string cookieName)
         {
             var cookie = HttpContext.Current.Request.Cookies[cookieName];
@@ -36,7 +28,6 @@ namespace SolutionSecurity
                 HttpContext.Current.Response.Cookies.Add(cookie);
             }
         }
-
 
         internal static void SendRedirectResponse(string configurationSetting)
         {

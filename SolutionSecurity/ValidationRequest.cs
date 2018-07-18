@@ -17,19 +17,11 @@ namespace SolutionSecurity
 
         private const string TemporalCookieName = "CookieTemp";
 
-        private const string AddingUrl = "Adding.ashx";
-
-        //internal bool IsRequestAuthorized()
-        //{
-
-        //}
-
         internal static bool IsValidationSecurityActivated()
         {
             return WebConfigurationManager.AppSettings[SecurityActivationAppSetting]
                 .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
         }
-
 
         internal static bool IsAdministrationPageRequest(string pageUrl)
         {
@@ -53,7 +45,7 @@ namespace SolutionSecurity
                 context.Application[value] = encrypedValue;
                 context.Application.UnLock();
 
-                AdministrationPage.RemoveHttpCookie(TemporalCookieName);
+                SecurityManager.RemoveHttpCookie(TemporalCookieName);
 
                 context.Response.Write(encrypedValue);
             }
@@ -77,39 +69,29 @@ namespace SolutionSecurity
             context.Response.End();
         }
 
-        internal static void SendRemovingSessionAdministrationPageResponse()
+        internal static void SendRemovingSessionPageResponse()
         {
             var context = HttpContext.Current;
-            var sessionCookie = context.Request.Cookies[AdministrationPage.SessionCookieName];
+            var sessionCookie = context.Request.Cookies[SecurityManager.SessionCookieName];
 
-            var sessionCookieValue2 = sessionCookie?.Value;
-            AdministrationPage.RemoveHttpCookie(AdministrationPage.SessionCookieName);
+            var sessionCookieValue = sessionCookie?.Value;
+            SecurityManager.RemoveHttpCookie(SecurityManager.SessionCookieName);
 
-            if (sessionCookie == null || sessionCookieValue2 == null)
+            if (sessionCookie == null || sessionCookieValue == null)
             {
-                AdministrationPage.SendRedirectResponse(AdministrationPage.DefaultuUrlAppSetting);
+                SecurityManager.SendRedirectResponse(SecurityManager.DefaultuUrlAppSetting);
             }
 
-            var decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue2);
+            var decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue);
             var decryptedSessionValue = SecurityEncryption.Decrypt(decodedSessionCookieValue);
 
             context.Application.Lock();
             context.Application.Remove(decryptedSessionValue);
             context.Application.UnLock();
 
-            AdministrationPage.RemoveHttpCookie(AdministrationPage.AspNetSessionId);
+            SecurityManager.RemoveHttpCookie(SecurityManager.AspNetSessionId);
 
-            AdministrationPage.SendRedirectResponse(AdministrationPage.LogOutUrlAppSetting);
+            SecurityManager.SendRedirectResponse(SecurityManager.LogOutUrlAppSetting);
         }
-
-        //private static void RemoveHttpCookie(string cookieName)
-        //{
-        //    var cookie = HttpContext.Current.Request.Cookies[cookieName];
-        //    if (cookie != null)
-        //    {
-        //        cookie.Expires = DateTime.Now.AddDays(-1);
-        //        HttpContext.Current.Response.Cookies.Add(cookie);
-        //    }
-        //}
     }
 }
