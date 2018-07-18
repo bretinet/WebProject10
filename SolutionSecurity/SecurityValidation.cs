@@ -27,8 +27,7 @@ namespace SolutionSecurity
         private const string TrueValue = "True";
 
         public void Dispose()
-        {
-            //throw new NotImplementedException();
+        {            
         }
 
         public void Init(HttpApplication context)
