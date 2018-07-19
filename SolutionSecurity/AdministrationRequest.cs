@@ -7,26 +7,26 @@ using System.Web;
 
 namespace SolutionSecurity
 {
-    internal class ValidationRequest
+    internal class AdministrationRequest
     {
 
         private const string DecryptedValueForm = "decryptedValue";
 
-        private const string SecurityActivationAppSetting = "SecurityActivation";
-        private const string TrueValue = "True";
+        //private const string SecurityActivationAppSetting = "SecurityActivation";
+        //private const string TrueValue = "True";
 
         private const string TemporalCookieName = "CookieTemp";
 
-        internal static bool IsValidationSecurityActivated()
-        {
-            return WebConfigurationManager.AppSettings[SecurityActivationAppSetting]
-                .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
-        }
+        //internal static bool IsValidationSecurityActivated()
+        //{
+        //    return WebConfigurationManager.AppSettings[SecurityActivationAppSetting]
+        //        .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
+        //}
 
-        internal static bool IsAdministrationPageRequest(string pageUrl)
-        {
-            return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
-        }
+        //internal static bool IsAdministrationPageRequest(string pageUrl)
+        //{
+        //    return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
+        //}
 
         internal static void SendAddingSessionPageResponse()
         {
@@ -79,7 +79,7 @@ namespace SolutionSecurity
 
             if (sessionCookie == null || sessionCookieValue == null)
             {
-                SecurityManager.SendRedirectResponse(SecurityManager.DefaultuUrlAppSetting);
+                SecurityManager.SendRedirectResponse(ApplicationResponseType.defaultUrl);
             }
 
             var decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue);
@@ -89,9 +89,9 @@ namespace SolutionSecurity
             context.Application.Remove(decryptedSessionValue);
             context.Application.UnLock();
 
-            SecurityManager.RemoveHttpCookie(SecurityManager.AspNetSessionId);
+            SecurityManager.RemoveHttpCookie(SecurityManager.AspNetSessionIdCookieName);
 
-            SecurityManager.SendRedirectResponse(SecurityManager.LogOutUrlAppSetting);
+            SecurityManager.SendRedirectResponse(ApplicationResponseType.logOutUrl);
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Web;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Web;
 using System.Web.Configuration;
 
 namespace SolutionSecurity
@@ -10,15 +8,24 @@ namespace SolutionSecurity
     internal class SecurityManager
     {
         internal const string SessionCookieName = "SessionCookie";
+        internal const string AspNetSessionIdCookieName = "ASP.NET_SessionId";
+
+        private const string SecurityActivationAppSetting = "SecurityActivation";
+        internal const string DefaultRootUrlAppSetting = "DefaultRootUrl";
+        internal const string DefaultChildUrlAppSetting = "DefaultChildUrl";
         internal const string LogOutUrlAppSetting = "LogOutUrl";
-        internal const string AspNetSessionId = "ASP.NET_SessionId";
+        internal const string LogOutChildUrlAppSetting = "LogOutChildUrl";
 
-        internal const string DefaultuUrlAppSetting = "DefaultUrl";
+        private const string AllowedPagesAppSetting = "AllowedPages";
 
-        internal const string AddingSession = "Adding.ashx";
-        internal const string CheckingSession = "Checking.ashx";
-        internal const string RemovingSession = "Removing.ashx";
-        
+        internal const string AddingSessionUrl = "Adding.ashx";
+        internal const string CheckingSessionUrl = "Checking.ashx";
+        internal const string RemovingSessionUrl = "Removing.ashx";
+
+        private const string TrueValue = "True";
+
+        internal static ApplicationLevelRequestType? ApplicationLevelRequest { get; set; }
+
         internal static void RemoveHttpCookie(string cookieName)
         {
             var cookie = HttpContext.Current.Request.Cookies[cookieName];
@@ -29,9 +36,11 @@ namespace SolutionSecurity
             }
         }
 
-        internal static void SendRedirectResponse(string configurationSetting)
+        internal static void SendRedirectResponse(ApplicationResponseType responseType)
         {
-            var returnUrl = WebConfigurationManager.AppSettings[configurationSetting];
+            var responseAppSetting = GetResponseByLevelRequest(responseType);
+
+            var returnUrl = WebConfigurationManager.AppSettings[responseAppSetting];
 
             if (string.IsNullOrEmpty(returnUrl))
             {
@@ -40,5 +49,92 @@ namespace SolutionSecurity
 
             HttpContext.Current.Response.Redirect(returnUrl);
         }
+
+        internal static string GetResponseByLevelRequest(ApplicationResponseType responseType)
+        {
+            if (ApplicationLevelRequest == null)
+            {
+                ApplicationLevelRequest = GetApplicationLevelRequest();
+            }
+
+            if (ApplicationLevelRequest == ApplicationLevelRequestType.RootapplicationLevel)
+            {
+                return responseType == ApplicationResponseType.logOutUrl ? LogOutUrlAppSetting : DefaultRootUrlAppSetting;
+            }
+
+            if (ApplicationLevelRequest == ApplicationLevelRequestType.ChildApplicationLevel)
+            {
+                return responseType == ApplicationResponseType.logOutUrl ? LogOutChildUrlAppSetting : DefaultChildUrlAppSetting;
+            }
+            return DefaultRootUrlAppSetting;
+        }
+
+        internal static bool IsValidationSecurityActivated()
+        {
+            return WebConfigurationManager
+                .AppSettings[SecurityActivationAppSetting]
+                .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        internal static bool IsAdministrationPageRequest(string pageUrl)
+        {
+            return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        internal static bool IsRequestedPageInAllowedPageList()
+        {
+            var allowedPages = WebConfigurationManager.AppSettings[AllowedPagesAppSetting];
+
+            if (allowedPages == null)
+            {
+                return false;
+            }
+
+            var allowedPagesList = allowedPages
+                                    .Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(s => s.Trim())
+                                    .ToList();
+
+            var currentpage = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath?.Replace("~/", "");
+
+            return currentpage != null && allowedPagesList.Contains(currentpage, StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        internal static ApplicationLevelRequestType GetApplicationLevelRequest()
+        {
+            var applicationPath = HttpContext.Current.Request.ApplicationPath;
+
+            if (applicationPath == null)
+            {
+                return ApplicationLevelRequestType.None;
+            }
+
+            if (applicationPath.Equals("/"))
+            {
+                return ApplicationLevelRequestType.RootapplicationLevel;
+            }
+            else
+            {
+                return ApplicationLevelRequestType.ChildApplicationLevel;
+            }
+        }
+    }
+
+    internal enum ApplicationLevelRequestType
+    {
+        None,
+        RootapplicationLevel,
+        ChildApplicationLevel
+    }
+    //internal class probe
+    //{
+    //    stst
+    //}
+
+
+    internal enum ApplicationResponseType
+    {
+        defaultUrl,
+        logOutUrl
     }
 }
