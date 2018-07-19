@@ -76,7 +76,7 @@ namespace SolutionSecurity
                 .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        internal static bool IsAdministrationPageRequest(string pageUrl)
+        internal static bool IsRequestToInternalSecurityPage(string pageUrl)
         {
             return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
         }

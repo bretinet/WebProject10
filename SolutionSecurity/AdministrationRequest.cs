@@ -9,24 +9,9 @@ namespace SolutionSecurity
 {
     internal class AdministrationRequest
     {
-
         private const string DecryptedValueForm = "decryptedValue";
-
-        //private const string SecurityActivationAppSetting = "SecurityActivation";
-        //private const string TrueValue = "True";
-
         private const string TemporalCookieName = "CookieTemp";
 
-        //internal static bool IsValidationSecurityActivated()
-        //{
-        //    return WebConfigurationManager.AppSettings[SecurityActivationAppSetting]
-        //        .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
-        //}
-
-        //internal static bool IsAdministrationPageRequest(string pageUrl)
-        //{
-        //    return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
-        //}
 
         internal static void SendAddingSessionPageResponse()
         {
