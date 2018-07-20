@@ -3,11 +3,7 @@ using System.Web;
 using System.Web.Configuration;
 
 namespace ICEProject
-{
-    /// <summary>
-    /// Summary description for Removing
-    /// </summary>
-    public class Removing : IHttpHandler
+{    public class Removing : IHttpHandler
     {
         private const string SessionCookieName = "SessionCookie";
         private const string CookieTempName = "CookieTemp";
@@ -19,7 +15,7 @@ namespace ICEProject
             var tempCookie = context.Request.Cookies[CookieTempName];
             var sessionCookie = context.Request.Cookies[SessionCookieName];
 
-            if (tempCookie == null || tempCookie.Value == null)
+            if (tempCookie?.Value == null)
             {
                 if (tempCookie != null)
                 {
@@ -31,8 +27,6 @@ namespace ICEProject
                     sessionCookie.Expires = DateTime.Now.AddDays(-1);
                     context.Response.Cookies.Add(sessionCookie);
                 }
-                //context.Response.Redirect("logon2.asp");
-                //context.Response.End();
                 GenerateContextResponse(context);
             }
 
@@ -40,21 +34,19 @@ namespace ICEProject
             tempCookie.Expires = DateTime.Now.AddDays(-1);
             context.Response.Cookies.Add(tempCookie);
 
-            if (sessionCookie == null || sessionCookie.Value == null)
+            if (sessionCookie?.Value == null)
             {
                 if (sessionCookie != null)
                 {
                     sessionCookie.Expires = DateTime.Now.AddDays(-1);
                     context.Response.Cookies.Add(sessionCookie);
                 }
-                //context.Response.End();
-                // context.Response.Redirect("logon2.asp");
                 GenerateContextResponse(context);
             }
 
-            var sessionCookieValue = sessionCookie.Value;
-            sessionCookie.Expires = DateTime.Now.AddDays(-1);
-            context.Response.Cookies.Add(sessionCookie);
+            //var sessionCookieValue = sessionCookie.Value;
+            //sessionCookie.Expires = DateTime.Now.AddDays(-1);
+            //context.Response.Cookies.Add(sessionCookie);
 
             var applicationCookieValue = context.Application[tempCookieValue];
 

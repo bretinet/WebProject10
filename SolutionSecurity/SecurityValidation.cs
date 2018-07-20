@@ -58,12 +58,12 @@ namespace SolutionSecurity
 
             if (!IsValidSessionCookie())
             {
-                SecurityManager.SendRedirectResponse(ApplicationResponseType.defaultUrl);
+                SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
             }
 
             if (!IsValidApplicationSession())
             {
-                SecurityManager.SendRedirectResponse(ApplicationResponseType.defaultUrl);
+                SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
             }
         }
 

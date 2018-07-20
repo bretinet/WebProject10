@@ -59,12 +59,12 @@ namespace SolutionSecurity
 
             if (ApplicationLevelRequest == ApplicationLevelRequestType.RootapplicationLevel)
             {
-                return responseType == ApplicationResponseType.logOutUrl ? LogOutUrlAppSetting : DefaultRootUrlAppSetting;
+                return responseType == ApplicationResponseType.LogOutUrl ? LogOutUrlAppSetting : DefaultRootUrlAppSetting;
             }
 
             if (ApplicationLevelRequest == ApplicationLevelRequestType.ChildApplicationLevel)
             {
-                return responseType == ApplicationResponseType.logOutUrl ? LogOutChildUrlAppSetting : DefaultChildUrlAppSetting;
+                return responseType == ApplicationResponseType.LogOutUrl ? LogOutChildUrlAppSetting : DefaultChildUrlAppSetting;
             }
             return DefaultRootUrlAppSetting;
         }
@@ -126,15 +126,11 @@ namespace SolutionSecurity
         RootapplicationLevel,
         ChildApplicationLevel
     }
-    //internal class probe
-    //{
-    //    stst
-    //}
 
 
     internal enum ApplicationResponseType
     {
-        defaultUrl,
-        logOutUrl
+        DefaultUrl,
+        LogOutUrl
     }
 }

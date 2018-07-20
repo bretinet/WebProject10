@@ -64,7 +64,7 @@ namespace SolutionSecurity
 
             if (sessionCookie == null || sessionCookieValue == null)
             {
-                SecurityManager.SendRedirectResponse(ApplicationResponseType.defaultUrl);
+                SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
             }
 
             var decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue);
@@ -76,7 +76,7 @@ namespace SolutionSecurity
 
             SecurityManager.RemoveHttpCookie(SecurityManager.AspNetSessionIdCookieName);
 
-            SecurityManager.SendRedirectResponse(ApplicationResponseType.logOutUrl);
+            SecurityManager.SendRedirectResponse(ApplicationResponseType.LogOutUrl);
         }
     }
 }
