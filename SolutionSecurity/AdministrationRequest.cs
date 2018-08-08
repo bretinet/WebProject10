@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Configuration;
 using System.Web;
 
 namespace SolutionSecurity
@@ -15,13 +11,13 @@ namespace SolutionSecurity
 
         internal static void SendAddingSessionPageResponse()
         {
-            var context = HttpContext.Current;
-            var cookie = context.Request.Cookies[TemporalCookieName];
+            HttpContext context = HttpContext.Current;
+            HttpCookie cookie = context.Request.Cookies[TemporalCookieName];
 
             if (cookie != null)
             {
-                var value = cookie.Value;
-                var encrypedValue = SecurityEncryption.Encrypt(value);
+                string value = cookie.Value;
+                string encrypedValue = SecurityEncryption.Encrypt(value);
 
                 cookie.Expires = DateTime.Now.AddDays(-1);
                 context.Response.Cookies.Add(cookie);
@@ -39,12 +35,12 @@ namespace SolutionSecurity
 
         internal static void SendCheckingApplicationPageResponse()
         {
-            var context = HttpContext.Current;
-            var sessionDecriptedCookieValue = context.Request.Form[DecryptedValueForm];
+            HttpContext context = HttpContext.Current;
+            string sessionDecriptedCookieValue = context.Request.Form[DecryptedValueForm];
 
             context.Response.ContentType = "text/plain";
 
-            var application = HttpContext.Current.Application[sessionDecriptedCookieValue];
+            object application = HttpContext.Current.Application[sessionDecriptedCookieValue];
 
             if (application != null)
             {
@@ -56,10 +52,10 @@ namespace SolutionSecurity
 
         internal static void SendRemovingSessionPageResponse()
         {
-            var context = HttpContext.Current;
-            var sessionCookie = context.Request.Cookies[SecurityManager.SessionCookieName];
+            HttpContext context = HttpContext.Current;
+            HttpCookie sessionCookie = context.Request.Cookies[SecurityManager.SessionCookieName];
 
-            var sessionCookieValue = sessionCookie?.Value;
+            string sessionCookieValue = sessionCookie?.Value;
             SecurityManager.RemoveHttpCookie(SecurityManager.SessionCookieName);
 
             if (sessionCookie == null || sessionCookieValue == null)
@@ -67,8 +63,8 @@ namespace SolutionSecurity
                 SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
             }
 
-            var decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue);
-            var decryptedSessionValue = SecurityEncryption.Decrypt(decodedSessionCookieValue);
+            string decodedSessionCookieValue = HttpUtility.UrlDecode(sessionCookieValue);
+            string decryptedSessionValue = SecurityEncryption.Decrypt(decodedSessionCookieValue);
 
             context.Application.Lock();
             context.Application.Remove(decryptedSessionValue);

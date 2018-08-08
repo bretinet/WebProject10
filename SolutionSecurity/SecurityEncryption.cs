@@ -20,19 +20,16 @@ namespace SolutionSecurity
 
 
 
-        public static string Encrypt(string strData)
+        public static string Encrypt(string data)
         {
-
-            return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(strData)));
+            return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(data)));
         }
 
-
-        // decoding
-        public static string Decrypt(string strData)
+        public static string Decrypt(string data)
         {
             try
             {
-                return Encoding.UTF8.GetString(Decrypt(Convert.FromBase64String(strData)));
+                return Encoding.UTF8.GetString(Decrypt(Convert.FromBase64String(data)));
             }
             catch
             {
@@ -42,7 +39,7 @@ namespace SolutionSecurity
 
         public static byte[] Encrypt(byte[] strData)
         {
-            var passbytes = new Rfc2898DeriveBytes(StrPermutation,
+            Rfc2898DeriveBytes passBytes = new Rfc2898DeriveBytes(StrPermutation,
                 new byte[] {
                     BytePermutation1,
                     BytePermutation2,
@@ -54,49 +51,52 @@ namespace SolutionSecurity
                     BytePermutation8
                 });
 
-            var memstream = new MemoryStream();
+            MemoryStream memoryStream = new MemoryStream();
             Aes aes = new AesManaged();
-            aes.Key = passbytes.GetBytes(aes.KeySize / 8);
 
-            aes.IV = passbytes.GetBytes(aes.BlockSize / 8);
+            aes.Key = passBytes.GetBytes(aes.KeySize / 8);
+            aes.IV = passBytes.GetBytes(aes.BlockSize / 8);
 
+            CryptoStream cryptoStream = new CryptoStream(
+                memoryStream,
+                aes.CreateEncryptor(),
+                CryptoStreamMode.Write);
 
-            var cryptostream = new CryptoStream(
-                                    memstream,
-                                    aes.CreateEncryptor(),
-                                    CryptoStreamMode.Write);
+            cryptoStream.Write(strData, 0, strData.Length);
+            cryptoStream.Close();
 
-            cryptostream.Write(strData, 0, strData.Length);
-            cryptostream.Close();
-
-            return memstream.ToArray();
+            return memoryStream.ToArray();
         }
 
         public static byte[] Decrypt(byte[] strData)
         {
-            var passbytes =
-            new Rfc2898DeriveBytes(StrPermutation,
-            new byte[] {
-                BytePermutation1,
-                BytePermutation2,
-                BytePermutation3,
-                BytePermutation4,
-                BytePermutation5,
-                BytePermutation6,
-                BytePermutation7,
-                BytePermutation8
+            Rfc2898DeriveBytes passBytes = new Rfc2898DeriveBytes(StrPermutation,
+                new byte[] {
+                    BytePermutation1,
+                    BytePermutation2,
+                    BytePermutation3,
+                    BytePermutation4,
+                    BytePermutation5,
+                    BytePermutation6,
+                    BytePermutation7,
+                    BytePermutation8
             });
 
-            var memstream = new MemoryStream();
+            MemoryStream memoryStream = new MemoryStream();
             Aes aes = new AesManaged();
-            aes.Key = passbytes.GetBytes(aes.KeySize / 8);
-            aes.IV = passbytes.GetBytes(aes.BlockSize / 8);
 
-            var cryptostream = new CryptoStream(memstream,
-            aes.CreateDecryptor(), CryptoStreamMode.Write);
+            aes.Key = passBytes.GetBytes(aes.KeySize / 8);
+            aes.IV = passBytes.GetBytes(aes.BlockSize / 8);
+
+            CryptoStream cryptostream = new CryptoStream(
+                memoryStream,
+                aes.CreateDecryptor(),
+                CryptoStreamMode.Write);
+
             cryptostream.Write(strData, 0, strData.Length);
             cryptostream.Close();
-            return memstream.ToArray();
+
+            return memoryStream.ToArray();
         }
     }
 }

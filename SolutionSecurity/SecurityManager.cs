@@ -38,9 +38,9 @@ namespace SolutionSecurity
 
         internal static void SendRedirectResponse(ApplicationResponseType responseType)
         {
-            var responseAppSetting = GetResponseByLevelRequest(responseType);
+            string responseAppSetting = GetResponseByLevelRequest(responseType);
 
-            var returnUrl = WebConfigurationManager.AppSettings[responseAppSetting];
+            string returnUrl = WebConfigurationManager.AppSettings[responseAppSetting];
 
             if (string.IsNullOrEmpty(returnUrl))
             {
