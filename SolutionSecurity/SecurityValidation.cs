@@ -30,43 +30,43 @@ namespace SolutionSecurity
 
         private void Context_BeginRequest(object sender, EventArgs e)
         {
-            if (!SecurityManager.IsValidationSecurityActivated())
+            if (!SecurityManager.IsSecurityActivated())
             {
                 return;
             }
 
-            if (SecurityManager.IsRequestToInternalSecurityPage(SecurityManager.AddingSessionUrl))
+            if (SecurityManager.IsRequestToSecurity(SecurityManager.AddingSessionUrl))
             {
                 AdministrationRequest.SendAddingSessionPageResponse();
             }
 
-            if (SecurityManager.IsRequestToInternalSecurityPage(SecurityManager.CheckingSessionUrl))
+            if (SecurityManager.IsRequestToSecurity(SecurityManager.CheckingSessionUrl))
             {
                 AdministrationRequest.SendCheckingApplicationPageResponse();
             }
 
-            if (SecurityManager.IsRequestToInternalSecurityPage(SecurityManager.RemovingSessionUrl))
+            if (SecurityManager.IsRequestToSecurity(SecurityManager.RemovingSessionUrl))
             {
                 AdministrationRequest.SendRemovingSessionPageResponse();
             }
 
-            if (SecurityManager.IsRequestedPageInAllowedPageList())
+            if (SecurityManager.IsRequestInAllowedPages())
             {
                 return;
             }
 
-            if (!IsValidSessionId())
+            if (!IsValidCookie() || !IsValidApplicationId())
             {
                 SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
             }
 
-            if (!IsValidApplicationId())
-            {
-                SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
-            }
+            //if (!IsValidApplicationId())
+            //{
+            //    SecurityManager.SendRedirectResponse(ApplicationResponseType.DefaultUrl);
+            //}
         }
 
-        private static bool IsValidSessionId()
+        private static bool IsValidCookie()
         {
             return !IsCookieNull() && IsValidCookieValue();
         }
@@ -125,6 +125,7 @@ namespace SolutionSecurity
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -159,7 +160,6 @@ namespace SolutionSecurity
             }
 
             List<string> allowedApplicationList = allowedApplications.Split(new[] { comma }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
-
             string currentpage = HttpContext.Current.Request.ApplicationPath?.Replace(slash, string.Empty);
 
             return currentpage != null && allowedApplicationList.Contains(currentpage, StringComparer.CurrentCultureIgnoreCase);

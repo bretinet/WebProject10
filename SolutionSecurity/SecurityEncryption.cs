@@ -8,6 +8,7 @@ namespace SolutionSecurity
 {
     public class SecurityEncryption
     {
+        private const int bits = 8;
         private const string StrPermutation = "axdwoutiyqf";
         private const int BytePermutation1 = 0x19;
         private const int BytePermutation2 = 0x59;
@@ -17,8 +18,6 @@ namespace SolutionSecurity
         private const int BytePermutation6 = 0x13;
         private const int BytePermutation7 = 0x29;
         private const int BytePermutation8 = 0x71;
-
-
 
         public static string Encrypt(string data)
         {
@@ -54,8 +53,8 @@ namespace SolutionSecurity
             MemoryStream memoryStream = new MemoryStream();
             Aes aes = new AesManaged();
 
-            aes.Key = passBytes.GetBytes(aes.KeySize / 8);
-            aes.IV = passBytes.GetBytes(aes.BlockSize / 8);
+            aes.Key = passBytes.GetBytes(aes.KeySize / bits);
+            aes.IV = passBytes.GetBytes(aes.BlockSize / bits);
 
             CryptoStream cryptoStream = new CryptoStream(
                 memoryStream,
@@ -70,7 +69,8 @@ namespace SolutionSecurity
 
         public static byte[] Decrypt(byte[] strData)
         {
-            Rfc2898DeriveBytes passBytes = new Rfc2898DeriveBytes(StrPermutation,
+            Rfc2898DeriveBytes deriveBytes = new Rfc2898DeriveBytes(
+                StrPermutation,
                 new byte[] {
                     BytePermutation1,
                     BytePermutation2,
@@ -85,16 +85,16 @@ namespace SolutionSecurity
             MemoryStream memoryStream = new MemoryStream();
             Aes aes = new AesManaged();
 
-            aes.Key = passBytes.GetBytes(aes.KeySize / 8);
-            aes.IV = passBytes.GetBytes(aes.BlockSize / 8);
+            aes.Key = deriveBytes.GetBytes(aes.KeySize / bits);
+            aes.IV = deriveBytes.GetBytes(aes.BlockSize / bits);
 
-            CryptoStream cryptostream = new CryptoStream(
+            CryptoStream cryptoStream = new CryptoStream(
                 memoryStream,
                 aes.CreateDecryptor(),
                 CryptoStreamMode.Write);
 
-            cryptostream.Write(strData, 0, strData.Length);
-            cryptostream.Close();
+            cryptoStream.Write(strData, 0, strData.Length);
+            cryptoStream.Close();
 
             return memoryStream.ToArray();
         }

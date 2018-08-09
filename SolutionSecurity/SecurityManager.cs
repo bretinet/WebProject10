@@ -69,19 +69,21 @@ namespace SolutionSecurity
             return DefaultRootUrlAppSetting;
         }
 
-        internal static bool IsValidationSecurityActivated()
+        internal static bool IsSecurityActivated()
         {
             return WebConfigurationManager
                 .AppSettings[SecurityActivationAppSetting]
                 .Equals(TrueValue, StringComparison.CurrentCultureIgnoreCase);
         }
 
-        internal static bool IsRequestToInternalSecurityPage(string pageUrl)
+        internal static bool IsRequestToSecurity(string pageUrl)
         {
-            return HttpContext.Current.Request.RawUrl.EndsWith(pageUrl, StringComparison.CurrentCultureIgnoreCase);
+            return HttpContext.Current.Request.RawUrl.EndsWith(
+                pageUrl, 
+                StringComparison.CurrentCultureIgnoreCase);
         }
 
-        internal static bool IsRequestedPageInAllowedPageList()
+        internal static bool IsRequestInAllowedPages()
         {
             var allowedPages = WebConfigurationManager.AppSettings[AllowedPagesAppSetting];
 

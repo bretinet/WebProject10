@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 
@@ -6,53 +7,65 @@ namespace ICEProject
 {
     public partial class ApplicationControl : System.Web.UI.Page
     {
+        List<KeyValuePair<string, string>> items;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-
-            //foreach(var v in Context.Application.AllKeys)
-            //{
-            //    Response.Write(v + "--" + Context.Application[v]);
-            //}
-
-            HtmlTable table1 = new HtmlTable();
-            // Set the table's formatting-related properties.
-            table1.Border = 1;
-            table1.CellPadding = 3;
-            table1.CellSpacing = 3;
-            table1.BorderColor = "red";
-
-            // Start adding content to the table.
-            HtmlTableRow row;
-            HtmlTableCell cell;
-            for (int i = 0; i < Context.Application.Count; i++)
+            if (!Page.IsCallback)
             {
-                // Create a new row and set its background color.
-                row = new HtmlTableRow();
-                row.BgColor = (i % 2 == 0 ? "lightyellow" : "lightcyan");
-                //for (int j = 0; j <= 3; j++)
+                //Application["Probe1"] = "Test1";
+                //Application["Probe2"] = "Test2";
+
+                items = new List<KeyValuePair<string, string>>();
+
+                foreach (var item in Context.Application.AllKeys)
                 {
-                    // Create a cell and set its text.
-                    cell = new HtmlTableCell();
-                    cell.InnerHtml = Context.Application.Keys[i];
-                        
-                    row.Cells.Add(cell);
+                    var v = new KeyValuePair<string, string>(item, Context.Application[item].ToString());
 
-                    cell = new HtmlTableCell();
-                    cell.InnerHtml = Context.Application.Get(i).ToString();
-
-                    row.Cells.Add(cell);
-
-                    cell = new HtmlTableCell();
-                    cell.Controls.Add(new Button());
-                    row.Cells.Add(cell);
+                    items.Add(v);
                 }
 
-                // Add the row to the table.
-                table1.Rows.Add(row);
+                GridView1.DataSource = items;
+                GridView1.DataBind();
             }
+        }
 
-            // Add the table to the page.
-            this.Controls.Add(table1);
+        protected void GridView1_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "DeleteRow")
+            {
+                var index = Convert.ToInt32(e.CommandArgument);
+
+                if (index > Application.Count)
+                {
+                    return;
+                }
+
+                var ff = Application[index];
+
+                Application.RemoveAt(index);
+                if (items == null)
+                {
+                    items = new List<KeyValuePair<string, string>>();
+                }
+                else
+                {
+                    items.Clear();
+                }
+
+
+                foreach (var item in Context.Application.AllKeys)
+                {
+                    var v = new KeyValuePair<string, string>(item, Context.Application[item].ToString());
+
+                    items.Add(v);
+                }
+
+                GridView1.DataSource = items;
+                GridView1.DataBind();
+            }
         }
     }
+
+
 }
